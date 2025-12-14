@@ -1,0 +1,50 @@
+import pandas as pd
+import numpy as np
+import cv2
+import os
+
+# ===============================
+# PATH CONFIGURATION
+# ===============================
+DATASET_PATH = r"C:\Users\pooja\Downloads\archive"
+SAVE_DIR = r"data/english"
+IMG_SIZE = 28
+
+os.makedirs(SAVE_DIR, exist_ok=True)
+
+# ===============================
+# Choose your dataset file (CSV / text)
+# ===============================
+csv_file = os.path.join(DATASET_PATH, "emnist-letters-train.csv")  # or .txt if needed
+
+# Load dataset
+df = pd.read_csv(csv_file, header=None)
+print("Data shape:", df.shape)
+
+# ===============================
+# CONVERT TO IMAGES
+# ===============================
+for i in range(df.shape[0]):
+    row = df.iloc[i].to_numpy(dtype=np.uint8)
+    label_idx = row[0]  # first column = label (1 = A)
+    pixels = row[1:]    # rest = 784 pixels
+    img = pixels.reshape(28, 28)
+
+    # Fix rotation to match EMNIST standard
+    img = np.rot90(img, k=1)
+    img = np.fliplr(img)
+
+    # Resize to 28x28 if necessary
+    img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+
+    # Save to folder
+    label_char = chr(label_idx + 64)  # 1 -> A
+    label_dir = os.path.join(SAVE_DIR, label_char)
+    os.makedirs(label_dir, exist_ok=True)
+
+    cv2.imwrite(os.path.join(label_dir, f"{i}.png"), img)
+
+    if i % 5000 == 0:
+        print(f"Processed {i} images...")
+
+print("✅ EMNIST dataset conversion complete!")
