@@ -31,10 +31,8 @@ env/
 *.swp
 *.swo
 
-# Data and models
+# Data (but keep models)
 data/
-*.h5
-*.hdf5
 
 # OS
 .DS_Store
@@ -43,5 +41,5 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
-# Streamlit
-.streamlit/
+# Streamlit secrets (but keep config)
+.streamlit/secrets.toml
