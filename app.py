@@ -20,6 +20,7 @@ st.set_page_config(
 # ===============================
 MODEL_PATH = "models/english_cnn.h5"
 IMAGE_SIZE = 28
+MIN_POINTS_FOR_PREDICTION = 35  # Minimum points before character prediction
 
 # ===============================
 # LOAD MODEL
@@ -67,13 +68,19 @@ if 'draw_color' not in st.session_state:
 # HELPER FUNCTIONS
 # ===============================
 def fingers_up(hand):
+    """
+    Detect which fingers are up.
+    Returns a list of booleans for each finger: [thumb, index, middle, ring, pinky]
+    
+    Note: Thumb uses left/right movement (x-axis) while other fingers use up/down (y-axis)
+    """
     tips = [4, 8, 12, 16, 20]
     fingers = []
     
-    # Thumb
+    # Thumb - check horizontal position (left/right)
     fingers.append(hand.landmark[tips[0]].x < hand.landmark[tips[0]-1].x)
     
-    # Other fingers
+    # Other fingers - check vertical position (up/down)
     for i in range(1, 5):
         fingers.append(hand.landmark[tips[i]].y < hand.landmark[tips[i]-2].y)
     
@@ -140,7 +147,7 @@ def process_frame(frame, draw_color):
         st.session_state.canvas[:] = 0
     
     # Character prediction
-    if len(st.session_state.points) > 35 and not result.multi_hand_landmarks:
+    if len(st.session_state.points) > MIN_POINTS_FOR_PREDICTION and not result.multi_hand_landmarks:
         if MODEL_LOADED and model is not None:
             char = predict_character(canvas, model)
             st.session_state.text_output += char
@@ -193,7 +200,7 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("Instructions")
     st.markdown("""
-    - 👆 **Index finger up**: Write
+    - 👆 **Index finger only**: Write
     - ✌️ **Index + Middle finger**: Space
     - ✊ **Fist (all fingers down)**: Delete
     - 📷 Use camera input below

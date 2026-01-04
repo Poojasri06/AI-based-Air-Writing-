@@ -33,6 +33,7 @@ env/
 
 # Data (but keep models)
 data/
+!models/
 
 # OS
 .DS_Store
